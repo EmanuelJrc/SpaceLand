@@ -4,50 +4,45 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public GameObject followObject;
-    public Vector2 followOffset;
-    public float speed = 3f;
-    private Vector2 threshold;
-    private Rigidbody2D rb;
+    //What are we following
+    public Transform target;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        threshold = calculateThreshold();
-        rb = followObject.GetComponent<Rigidbody2D>();
-    }
+    //Zeros out the velocity
+    Vector3 velocity = Vector3.zero;
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        Vector2 follow = followObject.transform.position;
-        float xDifference = Vector2.Distance(Vector2.right * transform.position.x, Vector2.right * follow.x);
-        float yDifference = Vector2.Distance(Vector2.up * transform.position.y, Vector2.up * follow.y);
+    //Time to follow target
+    public float smoothTime = .15f;
 
-        Vector3 newPosition = transform.position;
-        if (Mathf.Abs(xDifference) >= threshold.x)
-        {
-            newPosition.x = follow.x;
-        }
-        if (Mathf.Abs(yDifference) >= threshold.y)
-        {
-            newPosition.y = follow.y;
-        }
-        float moveSpeed = rb.velocity.magnitude > speed ? rb.velocity.magnitude : speed;
-        transform.position = Vector3.MoveTowards(transform.position, newPosition, moveSpeed * Time.deltaTime);
-    }
-    private Vector3 calculateThreshold()
-    {
-        Rect aspect = Camera.main.pixelRect;
-        Vector2 t = new Vector2(Camera.main.orthographicSize * aspect.width / aspect.height, Camera.main.orthographicSize);
-        t.x -= followOffset.x;
-        t.y -= followOffset.y;
-        return t;
-    }
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        Vector2 border = calculateThreshold();
-        Gizmos.DrawWireCube(transform.position, new Vector3(border.x * 2, border.y * 2, 1));
+    //Enable and set the maximum Y value
+    public bool YMaxEnabled = false;
+    public float YMaxValue = 0;
+
+    //Enable and set the min Y value
+    public bool YMinEnabled = false;
+    public float YMinValue = 0;
+
+    //Enable and set the maximum X value
+    public bool XMaxEnabled = false;
+    public float XMaxValue = 0;       
+
+    //Enable and set the min X value
+    public bool XMinEnabled = false;
+    public float XMinValue = 0;
+
+    void FixedUpdate(){
+        //Target position
+        Vector3 targetPos = target.position;
+
+        //Vertical
+        if (YMinEnabled && YMaxEnabled)
+            targetPos.y = Mathf.Clamp(target.position.y, YMinValue, YMaxValue);
+        
+
+        //Horizontal
+
+        //Align the camera and the targets z position
+        targetPos.z = transform.position.z;
+
+        transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref velocity, smoothTime);
     }
 }

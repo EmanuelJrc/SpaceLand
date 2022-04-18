@@ -10,11 +10,19 @@ public class Movement : MonoBehaviour
     Rigidbody2D leftLegRB;
     Rigidbody2D rightLegRB;
 
+    public Rigidbody2D rb;
 
     Animator anim;
+
     [SerializeField] float speed = 2f;
     [SerializeField] float jumpHeight = 2f;
     [SerializeField] float legWait = .5f;
+
+    private bool isOnGround;
+    public float positionRadius;
+    public LayerMask ground;
+    public Transform playerPos;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -47,14 +55,12 @@ public class Movement : MonoBehaviour
         {
             anim.Play("idle");
         }
-        if (Input.GetKeyDown(KeyCode.Space))
+        isOnGround = Physics2D.OverlapCircle(playerPos.position, positionRadius, ground);
+        if (isOnGround == true && Input.GetKeyDown(KeyCode.Space))
         {
-            leftLegRB.AddForce(Vector2.up * (jumpHeight * 1000));
-            rightLegRB.AddForce(Vector2.up * (jumpHeight * 1000));
+            rb.AddForce(Vector2.up * jumpHeight);
         }
-
     }
-
 
     IEnumerator MoveRight(float seconds)
     {
